@@ -1,0 +1,12 @@
+{
+    "name": "cheungq/luya-aliyun-oss",
+    "require": {
+        "yiier/yii2-aliyun-oss": "^0.1.0"
+    },
+    "authors": [
+        {
+            "name": "CheungQ",
+            "email": "240411405@qq.com"
+        }
+    ]
+}

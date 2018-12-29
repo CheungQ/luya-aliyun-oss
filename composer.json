@@ -3,6 +3,7 @@
     "require": {
         "yiier/yii2-aliyun-oss": "^0.1.0"
     },
+    "license": "MIT",
     "authors": [
         {
             "name": "CheungQ",

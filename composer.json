@@ -9,5 +9,8 @@
             "name": "CheungQ",
             "email": "240411405@qq.com"
         }
-    ]
+    ],
+    "autoload": {
+        "psr-4": {"cheungq\\": "src/"}
+    }
 }

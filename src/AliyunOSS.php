@@ -1,6 +1,6 @@
 <?php
 
-namespace luya\aliyun;
+namespace cheungq;
 
 use luya\admin\storage\BaseFileSystemStorage;
 use OSS\OssClient;

@@ -35,13 +35,13 @@ class AliyunOSS extends BaseFileSystemStorage
      * @var string Contains the name of the bucket defined on amazon webservice.
      */
     public $bucket;
-    
+
     /**
      * @var string The authentiication key in order to connect to the s3 bucket.
      * $accessKeyId, ,
      */
     public $accessKeyId;
-    
+
     /**
      * @var string The authentification secret in order to connect to the s3 bucket.
      */
@@ -59,19 +59,19 @@ class AliyunOSS extends BaseFileSystemStorage
      * @var string The ACL default permission when writing new files.
      */
     public $acl = 'public-read';
-    
+
     /**
      * @inheritdoc
      */
     public function init()
     {
         parent::init();
-        
+
         if ( $this->bucket === null || $this->accessKeyId === null) {
             throw new InvalidConfigException("region, bucket and key must be provided for s3 component configuration.");
         }
     }
-    
+
     private $_client;
 
     /**
@@ -84,28 +84,30 @@ class AliyunOSS extends BaseFileSystemStorage
         if ($this->_client === null) {
             $this->_client = new OSSClient($this->accessKeyId,$this->accessKeySecret,$this->endPoint);
         }
-        
+
         return $this->_client;
     }
-    
+
     private $_httpPaths = [];
-    
+
     /**
      * @inheritdoc
      */
     public function fileHttpPath($fileName)
     {
         if (!isset($this->_httpPaths[$fileName])) {
-            Yii::debug('Get OSS object url: ' . $fileName, __METHOD__);
-            #TODO 获取oss文件地址
-            if (!empty($this->getClient()->getObject($this->bucket, $fileName))){
+//            Yii::debug('Get OSS object url: ' . $fileName, __METHOD__);
+//            #TODO 获取oss文件地址
+//            var_dump($this->getClient()->getObject($this->bucket, $this->pathPrefix.'/'.$fileName));
+//            exit;
+            if (!empty($this->getClient()->getObject($this->bucket, $this->pathPrefix.'/'.$fileName))){
                 $this->_httpPaths[$fileName] = $this->domain .'/'.$this->pathPrefix.'/'.$fileName;
             }
         }
-        
+
         return $this->_httpPaths[$fileName];
     }
-    
+
     /**
      * @inheritdoc
      */
@@ -113,7 +115,7 @@ class AliyunOSS extends BaseFileSystemStorage
     {
         return $this->fileHttpPath($fileName);
     }
-    
+
     /**
      * @inheritdoc
      */
@@ -121,7 +123,7 @@ class AliyunOSS extends BaseFileSystemStorage
     {
         return $this->fileHttpPath($fileName);
     }
-    
+
     /**
      * @inheritdoc
      */
@@ -129,17 +131,17 @@ class AliyunOSS extends BaseFileSystemStorage
     {
         try {
             $object = $this->client->getObject($this->bucket, $fileName);
-            
+
             if ($object) {
-                return $object['Body'];
+                return $object;
             }
         } catch (\OSS\Core\OssException $e) {
             return false;
         }
-        
+
         return false;
     }
-    
+
     /**
      * @inheritdoc
      */
@@ -147,8 +149,8 @@ class AliyunOSS extends BaseFileSystemStorage
     {
         return !empty($this->fileHttpPath($fileName));
     }
-    
-    
+
+
     /**
      * @inheritdoc
      */
@@ -160,9 +162,10 @@ class AliyunOSS extends BaseFileSystemStorage
 //            'Key' => $fileName,
 //            'SourceFile' => $source,
 //        ];
-        return $this->client->putObject($this->bucket,$this->pathPrefix.DIRECTORY_SEPARATOR.$fileName,$source);
+        $source =  file_get_contents($source);
+        return $this->client->putObject($this->bucket,$this->pathPrefix."/".$fileName,$source);
     }
-    
+
     /**
      * @inheritdoc
      */
@@ -170,7 +173,7 @@ class AliyunOSS extends BaseFileSystemStorage
     {
         return $this->fileSystemSaveFile($newSource, $fileName);
     }
-    
+
     /**
      * @inheritdoc
      */

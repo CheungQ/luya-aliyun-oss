@@ -2,7 +2,9 @@
 
 namespace cheungq;
 
+use Flow\File;
 use luya\admin\storage\BaseFileSystemStorage;
+use OSS\Core\OssException;
 use OSS\OssClient;
 use yii\base\InvalidConfigException;
 use Yii;
@@ -97,7 +99,7 @@ class AliyunOSS extends BaseFileSystemStorage
     {
         if (!isset($this->_httpPaths[$fileName])) {
 //            Yii::debug('Get OSS object url: ' . $fileName, __METHOD__);
-//            #TODO 获取oss文件地址
+//            #获取oss文件地址
 //            var_dump($this->getClient()->getObject($this->bucket, $this->pathPrefix.'/'.$fileName));
 //            exit;
             if (!empty($this->getClient()->getObject($this->bucket, $this->pathPrefix.'/'.$fileName))){
@@ -121,7 +123,21 @@ class AliyunOSS extends BaseFileSystemStorage
      */
     public function fileServerPath($fileName)
     {
-        return $this->fileHttpPath($fileName);
+        try{
+            $object = $this->getClient()->getObject($this->bucket, $this->pathPrefix.'/'.$fileName);
+            if (!empty($object)){
+                if (function_exists('sys_get_temp_dir')) {
+                    $file = tempnam(sys_get_temp_dir(), "oss_tmp");
+                } else {
+                    $file = tempnam("/tmp", "oss_tmp");
+                }
+                file_put_contents($file, $object);
+                return $file;
+            }
+            return false;
+        }catch (OssException $e){
+            throw new Exception("get server path failed");
+        }
     }
 
     /**
@@ -156,12 +172,6 @@ class AliyunOSS extends BaseFileSystemStorage
      */
     public function fileSystemSaveFile($source, $fileName)
     {
-//        $config = [
-//            'ACL' => $this->acl,
-//            'Bucket' => $this->bucket,
-//            'Key' => $fileName,
-//            'SourceFile' => $source,
-//        ];
         $source =  file_get_contents($source);
         return $this->client->putObject($this->bucket,$this->pathPrefix."/".$fileName,$source);
     }

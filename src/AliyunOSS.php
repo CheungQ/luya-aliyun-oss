@@ -160,8 +160,7 @@ class AliyunOSS extends BaseFileSystemStorage
 //            'Key' => $fileName,
 //            'SourceFile' => $source,
 //        ];
-        
-        return $this->client->putObject($this->bucket,$fileName,$source);
+        return $this->client->putObject($this->bucket,$this->pathPrefix.DIRECTORY_SEPARATOR.$fileName,$source);
     }
     
     /**

@@ -13,44 +13,43 @@ use Yii;
  * Aliyun OSS For Luya
  *
  *
- *
  * ```php
  * 'storage' => [
  *     'class' => 'luya\aliyun\AliyunOSS',
  *     'accessKeyId' => 'xxxxx', // 阿里云OSS AccessKeyID
  *     'accessKeySecret' => 'xxxx', // 阿里云OSS AccessKeySecret
  *     'bucket' => 'xxx', // 阿里云的bucket空间
- *     'domain' => 'xxx', // 阿里云的bucket空间
- *     'pathPrefix' => 'xxx', // 阿里云的bucket空间
- *     'endPoint' => 'oss-cn-hangzhou.aliyuncs.com', //endPoint
+ *     'domain' => 'xxx', // 自己解析的域名，如果没有可填endPoint带http或者https
+ *     'pathPrefix' => 'xxx', // 文件夹名称
+ *     'endPoint' => 'xxx', //endPoint  如oss-cn-hangzhou.aliyuncs.com
  * ]
  * ```
  *
  * @property \OSS\OssClient $client Aliyun Oss Client.
  *
- * @author Basil Suter <basil@nadar.io>
- * @since 1.0.0
+ * @author CheungQ <cheungq@foxmail.com>
+ * @since 0.1.0
  */
 class AliyunOSS extends BaseFileSystemStorage
 {
     /**
-     * @var string Contains the name of the bucket defined on amazon webservice.
+     * @var string bucket
      */
     public $bucket;
 
     /**
-     * @var string The authentiication key in order to connect to the s3 bucket.
+     * @var string accessKeyId
      * $accessKeyId, ,
      */
     public $accessKeyId;
 
     /**
-     * @var string The authentification secret in order to connect to the s3 bucket.
+     * @var string accessKeySecret
      */
     public $accessKeySecret;
 
     /**
-     * @var string The authentification secret in order to connect to the s3 bucket.
+     * @var string oss-cn-hangzhou.aliyuncs.com
      */
     public $endPoint;
 
@@ -60,7 +59,7 @@ class AliyunOSS extends BaseFileSystemStorage
     /**
      * @var string The ACL default permission when writing new files.
      */
-    public $acl = 'public-read';
+//    public $acl = '';
 
     /**
      * @inheritdoc
@@ -69,8 +68,12 @@ class AliyunOSS extends BaseFileSystemStorage
     {
         parent::init();
 
-        if ( $this->bucket === null || $this->accessKeyId === null) {
-            throw new InvalidConfigException("region, bucket and key must be provided for s3 component configuration.");
+        if ( $this->bucket === null
+            || $this->accessKeyId === null
+            || $this->accessKeySecret === null
+            || $this->endPoint === null
+        ) {
+            throw new InvalidConfigException("bucket,Secret,endPoint and Key must be provided for AliyunOSS component configuration.");
         }
     }
 
@@ -93,17 +96,19 @@ class AliyunOSS extends BaseFileSystemStorage
     private $_httpPaths = [];
 
     /**
+     * 获取网络访问的地址
      * @inheritdoc
      */
     public function fileHttpPath($fileName)
     {
         if (!isset($this->_httpPaths[$fileName])) {
-//            Yii::debug('Get OSS object url: ' . $fileName, __METHOD__);
-//            #获取oss文件地址
-//            var_dump($this->getClient()->getObject($this->bucket, $this->pathPrefix.'/'.$fileName));
-//            exit;
-            if (!empty($this->getClient()->getObject($this->bucket, $this->pathPrefix.'/'.$fileName))){
-                $this->_httpPaths[$fileName] = $this->domain .'/'.$this->pathPrefix.'/'.$fileName;
+            //获取oss文件地址
+            $filePath = $fileName;
+            if($this->pathPrefix){
+                $filePath = $this->pathPrefix.'/'.$filePath;
+            }
+            if (!empty($this->getClient()->getObject($this->bucket, $filePath))){
+                $this->_httpPaths[$fileName] = $this->domain .'/'.$filePath;
             }
         }
 
@@ -119,6 +124,7 @@ class AliyunOSS extends BaseFileSystemStorage
     }
 
     /**
+     * 获取内容到本地并返回本地文件的路径
      * @inheritdoc
      */
     public function fileServerPath($fileName)
@@ -173,7 +179,11 @@ class AliyunOSS extends BaseFileSystemStorage
     public function fileSystemSaveFile($source, $fileName)
     {
         $source =  file_get_contents($source);
-        return $this->client->putObject($this->bucket,$this->pathPrefix."/".$fileName,$source);
+        $filePath = $fileName;
+        if($this->pathPrefix){
+            $filePath = $this->pathPrefix.'/'.$filePath;
+        }
+        return $this->client->putObject($this->bucket,$filePath,$source);
     }
 
     /**
@@ -189,6 +199,10 @@ class AliyunOSS extends BaseFileSystemStorage
      */
     public function fileSystemDeleteFile($fileName)
     {
-        return (bool) $this->client->deleteObject($this->bucket, $fileName);
+        $filePath = $fileName;
+        if($this->pathPrefix){
+            $filePath = $this->pathPrefix.'/'.$filePath;
+        }
+        return (bool) $this->client->deleteObject($this->bucket, $filePath);
     }
 }

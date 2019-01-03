@@ -9,6 +9,7 @@ Aliyun OSS for LUYA
 ```sh
 composer require cheungq/luya-aliyun-oss:~0.1.0
 ```
+composer.json
 ```json
 "require": {
         "cheungq/luya-aliyun-oss": "~0.1.0"
@@ -17,7 +18,7 @@ composer require cheungq/luya-aliyun-oss:~0.1.0
 
 ### Configuration 
 
-After installation via Composer include the storage component to your configuration in the components sesction with your credentials:
+修改env-local.php 添加相应的配置
 
 ```php
 'components' => [

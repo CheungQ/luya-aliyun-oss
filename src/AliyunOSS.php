@@ -19,7 +19,7 @@ use Yii;
  *     'accessKeyId' => 'xxxxx', // 阿里云OSS AccessKeyID
  *     'accessKeySecret' => 'xxxx', // 阿里云OSS AccessKeySecret
  *     'bucket' => 'xxx', // 阿里云的bucket空间
- *     'domain' => 'xxx', // 自己解析的域名，如果没有可填endPoint带http或者https
+ *     'domain' => 'xxx', // 自己解析的域名，如果没有可填Bucket域名，带https
  *     'pathPrefix' => 'xxx', // 文件夹名称
  *     'endPoint' => 'xxx', //endPoint  如oss-cn-hangzhou.aliyuncs.com
  * ]
@@ -53,9 +53,16 @@ class AliyunOSS extends BaseFileSystemStorage
      */
     public $endPoint;
 
+    /**
+     * @var string 绑定的oss域名
+     */
     public $domain;
 
+    /**
+     * @var string folder name in bucket
+     */
     public $pathPrefix;
+
     /**
      * @var string The ACL default permission when writing new files.
      */
